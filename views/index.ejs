@@ -1,0 +1,18 @@
+<!-- index.ejs -->
+
+<html>
+    <head>
+        <title>
+            Homepage
+        </title>
+    <body>
+        <%= title %>
+        <a href="/new"> New Message </a>
+        <% messages.map((message) => {  %>
+             <h1>User:  <%= message.user %></h1>
+             <h2>Message: <%= message.text %></h2>
+             <h3>Added: <%= message.added %> </h3>
+             <button><a href="/message/<%= message.id %>">Message details</a></button>
+        <% }); %>
+    </body>
+</html>
