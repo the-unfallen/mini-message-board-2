@@ -1,56 +1,37 @@
 const { Router } = require("express");
 const { v4: uuidv4 } = require("uuid");
-
+const db = require("../db/queries.js");
 const indexRouter = Router();
 
-const messages = [
-    {
-        text: "Hi there!",
-        user: "Amando",
-        added: new Date(),
-        id: uuidv4(),
-    },
-    {
-        text: "Hello World!",
-        user: "Charles",
-        added: new Date(),
-        id: uuidv4(),
-    },
-];
-
-indexRouter.get("/", (req, res) => {
-    res.render("index", { title: "Mini Messageboard", messages: messages });
+indexRouter.get("/", async (req, res) => {
+    const allMessages = await db.getAllMessages();
+    console.log(allMessages);
+    res.render("index", { title: "Mini Messageboard", messages: allMessages });
 });
 
 indexRouter.get("/new", (req, res) => {
     res.render("form");
 });
 
-indexRouter.post("/new", (req, res) => {
+indexRouter.post("/new", async (req, res) => {
     const the_author = req.body["authorName"];
     const the_message = req.body["authorMessage"];
-    messages.push({
-        text: the_message,
-        user: the_author,
-        added: new Date(),
-        id: uuidv4(),
-    });
+    await db.newEntry(the_author, the_message);
 
     console.log(req.body);
 
     res.redirect("/");
 });
 
-indexRouter.get("/message/:messageId", (req, res) => {
+indexRouter.get("/message/:messageId", async (req, res) => {
     const { messageId } = req.params;
-    // check if messageId is in the message array
-    const foundMessage = messages.find((msg) => msg.id === messageId);
-    // if it is - display message details
-    if (!foundMessage) {
+    const foundMessage = await db.findMessage(messageId);
+
+    if (foundMessage.length === 0) {
         res.render("404");
     }
     if (foundMessage) {
-        res.render("message", { message: foundMessage });
+        res.render("message", { message: foundMessage[0] });
     }
 });
 
